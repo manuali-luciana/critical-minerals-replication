@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CriMinGeo — Critical Minerals Supply Chain Dashboard</title>
+<title>Critical Minerals &amp; Geoeconomics Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -17,13 +17,13 @@
   --rule: #c8c2b3;
   --rule-soft: #e3dfd4;
   --muted: #6b6457;
-  --accent: #8a3324;        /* deep brick — for emphasis */
-  --accent-2: #2c4a3e;      /* dark forest — for refining stage */
-  --accent-3: #4a4a8a;      /* muted indigo — for trade */
+  --accent: #8a3324;        /* deep brick, for emphasis */
+  --accent-2: #2c4a3e;      /* dark forest, for refining stage */
+  --accent-3: #4a4a8a;      /* muted indigo, for trade */
   --warn: #a55c1b;
   --na: #b8b0a0;
 
-  /* Concentration heat scale — single hue, ordered */
+  /* Concentration heat scale, single hue, ordered */
   --heat-0: #f0e9da;
   --heat-1: #ddb87a;
   --heat-2: #c98447;
@@ -731,12 +731,12 @@ footer.colophon {
 
 <header class="masthead">
   <div>
-    <div class="title serif">CriMinGeo</div>
-    <div class="subtitle">A panorama of critical mineral supply chains, 2000–2023</div>
+    <div class="title serif">Critical Minerals &amp; Geoeconomics</div>
+    <div class="subtitle">A panorama of critical mineral supply chains, 2000-2023</div>
   </div>
   <div class="meta">
-    Critical Minerals & Geoeconomics<br>
-    IAE-CSIC · PI: Christopher Rauh
+    IAE-CSIC<br>
+    PI: Christopher Rauh
   </div>
 </header>
 
@@ -751,7 +751,8 @@ footer.colophon {
   <div class="overview-intro">
     <div>
       <h2 class="serif">Where the chokepoints are.</h2>
-      <p>This dashboard maps the global supply chain of thirteen critical minerals across three stages — extraction, processing, and trade — between 2000 and 2023. The matrix below shows, for each mineral and each stage, how concentrated production is in its leading country in the most recent year of available data. Hatched cells indicate stages for which public country-level data is not currently in the dataset; in many cases, this is because such data is not produced by the standard public sources. Click any row to drill into a mineral profile.</p>
+      <p>This dashboard maps the global supply chain of thirteen critical minerals across three stages: extraction, processing, and trade, between 2000 and 2023. The matrix below shows, for each mineral and each stage, how concentrated production is in its leading country in the most recent year of available data. Click any row to drill into a mineral profile.<sup style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--accent);margin-left:2px;">[1]</sup></p>
+      <p style="font-size: 12px; color: var(--muted); margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--rule-soft);"><sup style="color:var(--accent);">[1]</sup> Hatched cells indicate stages for which public country-level data is not currently in the dataset. In many cases this is because such data is not produced by the standard public sources.</p>
     </div>
     <div class="overview-controls">
       <span class="label">Heat metric</span>
@@ -787,7 +788,7 @@ footer.colophon {
 <!-- LAYER 1: MINERAL PROFILE ─────────────────────────────────────────────── -->
 <section id="tab-profile" class="tab-pane">
   <div class="profile-header">
-    <h2 id="profile-title" class="serif">—</h2>
+    <h2 id="profile-title" class="serif">&hellip;</h2>
     <div class="mineral-picker" id="mineral-picker"></div>
   </div>
 
@@ -803,7 +804,7 @@ footer.colophon {
     <div class="stage-panel stage-mining" id="panel-mining">
       <div class="stage-header">
         <span class="stage-title">Mining / extraction</span>
-        <span class="stage-units mono" id="mining-units">—</span>
+        <span class="stage-units mono" id="mining-units">&hellip;</span>
       </div>
       <div class="stage-stats" id="mining-stats"></div>
       <div class="chart-container" id="mining-chart"></div>
@@ -811,7 +812,7 @@ footer.colophon {
     <div class="stage-panel stage-refining" id="panel-refining">
       <div class="stage-header">
         <span class="stage-title">Refining / processing</span>
-        <span class="stage-units mono" id="refining-units">—</span>
+        <span class="stage-units mono" id="refining-units">&hellip;</span>
       </div>
       <div class="stage-stats" id="refining-stats"></div>
       <div class="chart-container" id="refining-chart"></div>
@@ -819,7 +820,7 @@ footer.colophon {
   </div>
 
   <div class="trade-section">
-    <h3>Trade flows — UN Comtrade (USD value)</h3>
+    <h3>Trade flows, UN Comtrade (USD value)</h3>
     <div class="year-controls" style="margin-bottom:14px;">
       <span>Stage</span>
       <div class="toggle-group" style="max-width:280px;" id="trade-stage-toggle">
@@ -844,34 +845,34 @@ footer.colophon {
 <!-- LAYER 4: COMPARE ─────────────────────────────────────────────────────── -->
 <section id="tab-compare" class="tab-pane">
   <h2 class="serif" style="font-size:24px;font-weight:500;margin-bottom:8px;">Cross-mineral comparison</h2>
-  <p style="color:var(--muted);margin-bottom:20px;max-width:720px;">Select up to four minerals to compare top-1 country shares and concentration (HHI) over time. Useful for asking whether the grip of dominant producers is tightening uniformly across critical minerals or only in specific cases.</p>
+  <p style="color:var(--muted);margin-bottom:20px;max-width:720px;">Select up to four minerals to compare top-1 country shares and concentration (HHI) over time.</p>
   <div class="compare-controls">
     <span class="label">Minerals (click to toggle, max 4)</span>
     <div class="compare-picker" id="compare-picker"></div>
   </div>
   <div class="compare-charts">
     <div class="compare-chart-block">
-      <h4>Mining — Top-1 country share (%)</h4>
+      <h4>Mining: top-1 country share (%)</h4>
       <div id="compare-mining-top1"></div>
     </div>
     <div class="compare-chart-block">
-      <h4>Mining — HHI</h4>
+      <h4>Mining: HHI</h4>
       <div id="compare-mining-hhi"></div>
     </div>
     <div class="compare-chart-block">
-      <h4>Refining — Top-1 country share (%)</h4>
+      <h4>Refining: top-1 country share (%)</h4>
       <div id="compare-refining-top1"></div>
     </div>
     <div class="compare-chart-block">
-      <h4>Refining — HHI</h4>
+      <h4>Refining: HHI</h4>
       <div id="compare-refining-hhi"></div>
     </div>
   </div>
 </section>
 
 <footer class="colophon">
-  <div>CriMinGeo dashboard · v1 · build: <span id="build-date">—</span></div>
-  <div>Data: BGS · USGS MCS · UN Comtrade</div>
+  <div>Critical Minerals &amp; Geoeconomics dashboard · build: <span id="build-date">&hellip;</span></div>
+  <div>Data: BGS · UN Comtrade</div>
 </footer>
 
 </div>
@@ -881,37 +882,31 @@ footer.colophon {
 <div class="drawer" id="drawer">
   <button class="close" id="drawer-close">×</button>
   <h3 class="serif" id="drawer-title">Methodology &amp; sources</h3>
-  <div class="drawer-sub" id="drawer-sub">Context-aware notes</div>
+  <div class="drawer-sub" id="drawer-sub">&nbsp;</div>
   <div id="drawer-content">
     <h4>About this dashboard</h4>
-    <p>This is a working v1 built for the CriMinGeo project (IAE-CSIC). It is a descriptive panorama, not a forecasting tool. Selections in the main view drive the contextual notes shown here.</p>
+    <p>A descriptive panorama of the global supply chains of thirteen critical minerals across three stages (extraction, processing, and trade) between 2000 and 2023. The dashboard surfaces production concentration, refining geography where data exists, and bilateral trade flows. It is descriptive, not predictive.</p>
 
     <h4>Time window</h4>
-    <p>All series are shown for 2000–2023. This window is set by UN Comtrade availability rather than by mining data: BGS series go back to 1971 but trade data is reliable from 2000 onwards. The full BGS history is preserved in the underlying repository.</p>
+    <p>All series are shown for 2000 to 2023. This window reflects current data availability in the build; BGS production series go back to 1971 and UN Comtrade goes further back as well, and the window may be extended in future iterations.</p>
 
-    <h4>Production data — BGS</h4>
-    <p>Country-level production figures come from the British Geological Survey World Mineral Statistics. Within each commodity file, the column <span class="mono">bgs_commodity_trans</span> distinguishes stages (e.g. "cobalt, mine" vs "cobalt, refined"). The build script classifies these into two canonical stages — <em>mining</em> and <em>refining</em> — using keyword matching. Rows whose stage cannot be determined are dropped.</p>
-    <div class="source-note">Source: bgs.ac.uk / World Mineral Statistics dataset, accessed for this build.</div>
+    <h4>Production data, BGS</h4>
+    <p>Country-level production figures come from the British Geological Survey World Mineral Statistics. Within each commodity file, the column <span class="mono">bgs_commodity_trans</span> distinguishes stages (e.g. "cobalt, mine" vs "cobalt, refined"). The build script classifies these into two canonical stages, <em>mining</em> and <em>refining</em>, using keyword matching plus per-mineral overrides for cases where the labels do not fit the standard pattern. Rows whose stage cannot be determined are dropped.</p>
+    <div class="source-note">Source: bgs.ac.uk / World Mineral Statistics dataset.</div>
 
-    <h4>Trade data — UN Comtrade</h4>
-    <p>Bilateral trade flows by HS code, downloaded via UN Comtrade API. Each mineral file carries a <span class="mono">stage</span> column ("primary" or "refined") set by the upstream download script based on which HS code the row belongs to. Values shown are USD (<span class="mono">primaryValue</span>); bilateral flows only — rows where the partner is "World" are excluded.</p>
-    <p><em>Caveat:</em> HS codes are an imperfect proxy for the mining/refining distinction. Some stages are reported under codes that lump multiple stages together; some products move under codes that don't cleanly correspond to either category. See per-mineral notes when a profile is selected.</p>
+    <h4>Trade data, UN Comtrade</h4>
+    <p>Bilateral trade flows by HS code, downloaded via UN Comtrade API. Each mineral file carries a <span class="mono">stage</span> column ("primary" or "refined") set by the upstream download script based on which HS code the row belongs to. Values shown are USD (<span class="mono">primaryValue</span>), bilateral flows only; rows where the partner is "World" are excluded.</p>
+    <p><em>Caveat:</em> HS codes are an imperfect proxy for the mining/refining distinction. Some stages are reported under codes that lump multiple stages together; some products move under codes that do not cleanly correspond to either category. See per-mineral notes when a profile is selected.</p>
     <div class="source-note">Source: comtrade.un.org via official API.</div>
-
-    <h4>Reserves</h4>
-    <p>Reserves estimates from USGS Mineral Commodity Summaries 2025 are present in the underlying data but not yet integrated into the dashboard view; this is a deliberate v1 scoping choice and a slot is reserved for adding the reserves-vs-production comparison in a later iteration.</p>
 
     <h4>Concentration metrics</h4>
     <p><strong>Top-1 share</strong> is the percentage of global production accounted for by the leading country in a given year. <strong>HHI</strong> (Herfindahl-Hirschman Index) is the sum of squared shares (each in percentage points), ranging from near 0 (perfect competition) to 10,000 (single-country monopoly). HHI above 2,500 is conventionally read as "highly concentrated"; above 5,000 indicates extreme concentration.</p>
 
     <h4>Country names</h4>
-    <p>Source files use different country naming conventions (BGS uses "Congo, Democratic Republic"; Comtrade uses "Dem. Rep. of the Congo"; USGS MCS uses "Congo (Kinshasa)"). The build script harmonizes these to a single canonical short name. The harmonization map covers the top producers cleanly; the long tail of small producers may show inconsistencies and is being expanded iteratively.</p>
+    <p>Source files use different country naming conventions (BGS uses "Congo, Democratic Republic", Comtrade uses "Dem. Rep. of the Congo"). The build script harmonizes these to a single canonical short name. The harmonization map covers the top producers cleanly; the long tail of small producers may show inconsistencies and is being expanded iteratively.</p>
 
     <h4>Mineral-specific notes</h4>
     <p id="mineral-specific-notes" style="color:var(--muted); font-style:italic;">Select a mineral profile to see notes specific to its data.</p>
-
-    <h4>Build &amp; reproducibility</h4>
-    <p>Generated by <span class="mono">code/build_dashboard_data.py</span> from raw CSVs in <span class="mono">data/source/</span>. To rebuild after new data lands: replace the source files, re-run the script, commit the regenerated <span class="mono">docs/data/*.json</span> files. No server required — the dashboard is a static page.</p>
   </div>
 </div>
 
@@ -1005,7 +1000,7 @@ function renderOverviewMatrix() {
     ["mining", "refining"].forEach(stage => {
       const r = row[stage];
       if (!r || !r.available) {
-        html += '<div class="matrix-cell na"><div class="heat-square na"></div><div class="desc"><span class="country">No data in v1</span></div></div>';
+        html += '<div class="matrix-cell na"><div class="heat-square na"></div><div class="desc"><span class="country">No data</span></div></div>';
       } else {
         const value = STATE.metric === "top1" ? r.top1_share : r.hhi;
         const color = heatColor(value, STATE.metric);
@@ -1124,7 +1119,7 @@ function renderStagePanel(stage, data) {
   if (!data) {
     unitsEl.textContent = "";
     statsEl.innerHTML = "";
-    chartEl.innerHTML = '<div class="no-data"><div class="nd-title">Not in v1</div>Country-level ' + stage + ' data is not yet integrated for this mineral. For some minerals (e.g. lithium, graphite, antimony, tungsten, individual REEs) the standard public sources do not produce country-level refined-stage figures. See methodology drawer for details.</div>';
+    chartEl.innerHTML = '<div class="no-data">Country-level ' + stage + ' data is not currently integrated for this mineral. For some minerals (e.g. lithium, graphite, antimony, tungsten, individual REEs) the standard public sources do not produce country-level refined-stage figures. See methodology drawer for details.</div>';
     return;
   }
 
@@ -1308,22 +1303,22 @@ function updateMineralSpecificNotes(p) {
     notes.push("Rare earths data aggregates across all individual REEs and reporting forms (ore minerals, oxides). Country-level data on individual REE production (Nd, Dy, Tb) is not available in public BGS series; total refined REE production by country is also not in public sources (Wood Mackenzie, paid).");
   }
   if (p.key === "manganese") {
-    notes.push("Manganese mining figures come from the BGS manganese file (gross ore weight). Refining figures cover ferromanganese and silicomanganese production from the BGS ferroalloys file — these are metallurgical-grade ferroalloys used in steelmaking, NOT battery-grade manganese sulphate (MnSO₄), which is not reported by country in public sources. <strong>Important caveat:</strong> China appears to be absent from BGS ferroalloys data and is therefore not reflected in the refining stage shown here. China is in fact a major producer of ferromanganese; the figures shown should be read as a lower bound on global production and as a partial picture of country shares.");
+    notes.push("Manganese mining figures come from the BGS manganese file (gross ore weight). Refining figures cover ferromanganese and silicomanganese production from the BGS ferroalloys file. These are metallurgical-grade ferroalloys used in steelmaking, NOT battery-grade manganese sulphate (MnSO₄), which is not reported by country in public sources. <strong>Important caveat:</strong> China appears to be absent from BGS ferroalloys data and is therefore not reflected in the refining stage shown here. China is in fact a major producer of ferromanganese; the figures shown should be read as a lower bound on global production and as a partial picture of country shares.");
   }
   if (p.key === "cobalt") {
-    notes.push("Cobalt is one of the cleanest cases: BGS reports both mine and refined production by country. Note that the trade panel shows the DRC as a major 'refined' exporter, but this reflects HS-code conventions — much of what leaves DRC is cobalt hydroxide / concentrate, classified under product codes that the upstream pipeline labels as refined. The BGS refined panel is the more direct measure of refining.");
+    notes.push("BGS reports both mine and refined cobalt production by country. The trade panel shows the DRC as a major 'refined' exporter, but this reflects HS-code conventions: much of what leaves DRC is cobalt hydroxide or concentrate, classified under product codes that the upstream pipeline labels as refined. The BGS refining panel is a more direct measure of country-level refining than the trade panel for this mineral.");
   }
   if (p.key === "pgms") {
     notes.push("BGS reports both 'platinum group metals, mine' and refined PGM production. In practice these are nearly identical figures attributed to the same countries (because PGM mine output is typically reported as contained metal, and most producing countries also smelt domestically). To avoid implying a separate refining stage exists where it largely does not, the dashboard shows mining only. The refined data is preserved in the underlying source files.");
   }
   if (p.key === "gallium") {
-    notes.push("Gallium has no mining stage. It is recovered as a byproduct of bauxite-to-alumina processing and zinc metallurgy. The figure shown under 'Refining' is the BGS 'gallium, primary' series — the first country-level production datum that exists for this metal. The empty mining panel reflects the upstream supply chain reality, not a data gap.");
+    notes.push("Gallium has no mining stage. It is recovered as a byproduct of bauxite-to-alumina processing and zinc metallurgy. The figure shown under 'Refining' is the BGS 'gallium, primary' series, the first country-level production datum that exists for this metal. The empty mining panel reflects the upstream supply chain reality, not a data gap.");
   }
   if (p.key === "germanium") {
-    notes.push("Germanium has no mining stage. It is mainly a byproduct of zinc mining, and can also be extracted from coal ash. The figure shown under 'Refining' is the BGS 'germanium metal' series — the first country-level production datum that exists. The empty mining panel reflects the upstream supply chain, not missing data.");
+    notes.push("Germanium has no mining stage. It is mainly a byproduct of zinc mining, and can also be extracted from coal ash. The figure shown under 'Refining' is the BGS 'germanium metal' series, the first country-level production datum that exists. The empty mining panel reflects the upstream supply chain, not missing data.");
   }
   if (p.key === "magnesium") {
-    notes.push("Magnesium metal is extracted from dolomite, magnesite, or brines, but the upstream mineral tonnage attributable specifically to magnesium production is not reported by country. The figure shown under 'Refining' is the BGS 'magnesium metal, primary' series — the first country-level production datum that exists. The empty mining panel reflects the data gap upstream of the metallurgical stage.");
+    notes.push("Magnesium metal is extracted from dolomite, magnesite, or brines, but the upstream mineral tonnage attributable specifically to magnesium production is not reported by country. The figure shown under 'Refining' is the BGS 'magnesium metal, primary' series, the first country-level production datum that exists. The empty mining panel reflects the data gap upstream of the metallurgical stage.");
   }
   if (p.key === "antimony") {
     notes.push("BGS reports antimony mine production by country. Refined antimony (smelted/recovered metal) is not reported by country in public BGS series.");
@@ -1332,7 +1327,7 @@ function updateMineralSpecificNotes(p) {
     notes.push("BGS reports tungsten mine production by country. Refined tungsten products (APT, ferrotungsten, tungsten metal) are not reported by country in public BGS series.");
   }
   if (p.key === "graphite") {
-    notes.push("BGS reports natural graphite production under a single label 'graphite' (no further stage breakdown). Natural graphite is extracted directly, so this figure represents the mining stage. Refined / spherical graphite (used in battery anodes) is not reported by country in public sources — this is one of the data gaps documented by the EU's JRC RMIS.");
+    notes.push("BGS reports natural graphite production under a single label 'graphite' (no further stage breakdown). Natural graphite is extracted directly, so this figure represents the mining stage. Refined / spherical graphite (used in battery anodes) is not reported by country in public sources. This is one of the data gaps documented by the EU's JRC RMIS.");
   }
   if (notes.length === 0) {
     el.innerHTML = "<em>No mineral-specific notes for " + p.label + " in this build.</em>";
