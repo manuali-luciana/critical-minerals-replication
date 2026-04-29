@@ -1,0 +1,1500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CriMinGeo — Critical Minerals Supply Chain Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+
+<style>
+:root {
+  --ink: #1a1a1a;
+  --paper: #faf8f3;
+  --paper-2: #f3efe6;
+  --rule: #c8c2b3;
+  --rule-soft: #e3dfd4;
+  --muted: #6b6457;
+  --accent: #8a3324;        /* deep brick — for emphasis */
+  --accent-2: #2c4a3e;      /* dark forest — for refining stage */
+  --accent-3: #4a4a8a;      /* muted indigo — for trade */
+  --warn: #a55c1b;
+  --na: #b8b0a0;
+
+  /* Concentration heat scale — single hue, ordered */
+  --heat-0: #f0e9da;
+  --heat-1: #ddb87a;
+  --heat-2: #c98447;
+  --heat-3: #a85a2c;
+  --heat-4: #6e2818;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Inter", -apple-system, sans-serif;
+  font-size: 14px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: var(--accent); text-decoration: none; border-bottom: 1px solid currentColor; }
+a:hover { color: var(--ink); }
+
+.serif { font-family: "Fraunces", Georgia, serif; font-weight: 500; }
+.mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+
+/* ─────────────────────── Layout ─────────────────────── */
+
+.page {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 32px 48px 80px;
+}
+
+header.masthead {
+  border-bottom: 1px solid var(--ink);
+  padding-bottom: 16px;
+  margin-bottom: 28px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.masthead .title {
+  font-family: "Fraunces", serif;
+  font-weight: 600;
+  font-size: 32px;
+  letter-spacing: -0.01em;
+  line-height: 1.05;
+}
+.masthead .subtitle {
+  font-family: "Fraunces", serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 16px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+.masthead .meta {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  text-align: right;
+}
+
+/* ─────────────────────── Nav tabs ─────────────────────── */
+.tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 28px;
+}
+.tab {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 10px 18px 10px 0;
+  margin-right: 24px;
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  position: relative;
+  transition: color 0.15s ease;
+}
+.tab:hover { color: var(--ink); }
+.tab.active { color: var(--ink); }
+.tab.active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: calc(100% - 24px);
+  height: 2px;
+  background: var(--ink);
+}
+
+/* ─────────────────────── Layer 0: Overview ─────────────────────── */
+.overview-intro {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 48px;
+  margin-bottom: 28px;
+  align-items: start;
+}
+.overview-intro h2 {
+  font-family: "Fraunces", serif;
+  font-weight: 500;
+  font-size: 24px;
+  line-height: 1.2;
+  margin-bottom: 12px;
+}
+.overview-intro p {
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: #2a2a2a;
+}
+.overview-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: var(--paper-2);
+  border: 1px solid var(--rule-soft);
+}
+.overview-controls .label {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+}
+.toggle-group {
+  display: flex;
+  border: 1px solid var(--rule);
+  background: var(--paper);
+}
+.toggle-group button {
+  flex: 1;
+  padding: 8px 10px;
+  background: none;
+  border: none;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  cursor: pointer;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.toggle-group button.active {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.overview-matrix {
+  display: grid;
+  grid-template-columns: 180px 1fr 1fr;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+}
+.matrix-header {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--rule);
+}
+.matrix-row {
+  display: contents;
+  cursor: pointer;
+}
+.matrix-row > * {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--rule-soft);
+  transition: background 0.12s ease;
+}
+.matrix-row:hover > * {
+  background: var(--paper-2);
+}
+.matrix-mineral {
+  font-family: "Fraunces", serif;
+  font-weight: 500;
+  font-size: 16px;
+}
+.matrix-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12px;
+}
+.matrix-cell .heat-square {
+  width: 36px;
+  height: 22px;
+  flex-shrink: 0;
+  border: 1px solid rgba(0,0,0,0.15);
+}
+.matrix-cell .heat-square.na {
+  background: repeating-linear-gradient(45deg, var(--paper-2), var(--paper-2) 3px, var(--rule-soft) 3px, var(--rule-soft) 6px);
+  border-color: var(--rule);
+}
+.matrix-cell .desc { line-height: 1.3; }
+.matrix-cell .desc .country {
+  font-weight: 600;
+  color: var(--ink);
+}
+.matrix-cell .desc .figure {
+  color: var(--muted);
+  font-size: 11px;
+}
+.matrix-cell.na .desc .country {
+  color: var(--na);
+  font-style: italic;
+  font-family: "Fraunces", serif;
+  font-weight: 400;
+}
+
+.legend-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  color: var(--muted);
+}
+.heat-scale {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.heat-scale .scale-bar {
+  display: flex;
+}
+.heat-scale .scale-bar div {
+  width: 28px;
+  height: 12px;
+}
+
+/* ─────────────────────── Layer 1: Mineral profile ─────────────────────── */
+.profile-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.profile-header h2 {
+  font-family: "Fraunces", serif;
+  font-weight: 600;
+  font-size: 36px;
+  letter-spacing: -0.015em;
+}
+.mineral-picker {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  max-width: 720px;
+}
+.mineral-picker button {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 5px 10px;
+  background: none;
+  border: 1px solid var(--rule);
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+.mineral-picker button:hover { color: var(--ink); border-color: var(--ink); }
+.mineral-picker button.active {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+
+.headline {
+  font-family: "Fraunces", serif;
+  font-weight: 400;
+  font-size: 19px;
+  line-height: 1.45;
+  color: #2a2a2a;
+  border-left: 3px solid var(--accent);
+  padding: 4px 0 4px 18px;
+  margin: 16px 0 28px;
+  max-width: 880px;
+}
+.headline em {
+  font-style: italic;
+}
+.headline strong {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* Year selector */
+.year-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  background: var(--paper-2);
+  border: 1px solid var(--rule-soft);
+  margin-bottom: 24px;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+.year-controls .year-display {
+  font-family: "Fraunces", serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--ink);
+  text-transform: none;
+  letter-spacing: 0;
+  min-width: 60px;
+}
+.year-controls input[type="range"] {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--rule);
+  height: 2px;
+  outline: none;
+}
+.year-controls input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--ink);
+  cursor: pointer;
+}
+.year-controls input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--ink);
+  cursor: pointer;
+  border: none;
+}
+
+/* Stage panels */
+.stages {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  margin-bottom: 32px;
+}
+@media (max-width: 980px) {
+  .stages { grid-template-columns: 1fr; }
+}
+.stage-panel {
+  border-top: 1px solid var(--ink);
+  padding-top: 14px;
+}
+.stage-panel.stage-mining { border-top-color: var(--accent); border-top-width: 2px; }
+.stage-panel.stage-refining { border-top-color: var(--accent-2); border-top-width: 2px; }
+.stage-panel.stage-trade { border-top-color: var(--accent-3); border-top-width: 2px; }
+
+.stage-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.stage-title {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 600;
+}
+.stage-units {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  color: var(--muted);
+}
+.stage-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.stat {
+  border-left: 1px solid var(--rule);
+  padding-left: 12px;
+}
+.stat .stat-label {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin-bottom: 2px;
+}
+.stat .stat-value {
+  font-family: "Fraunces", serif;
+  font-weight: 600;
+  font-size: 22px;
+  line-height: 1.1;
+}
+.stat .stat-sub {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  color: var(--muted);
+}
+.chart-container {
+  width: 100%;
+  position: relative;
+}
+.chart-svg { width: 100%; display: block; }
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin-top: 8px;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10.5px;
+  color: var(--muted);
+}
+.chart-legend .legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: default;
+}
+.chart-legend .legend-swatch {
+  width: 10px;
+  height: 10px;
+  display: inline-block;
+}
+
+.no-data {
+  background: repeating-linear-gradient(45deg, var(--paper-2), var(--paper-2) 6px, var(--rule-soft) 6px, var(--rule-soft) 12px);
+  border: 1px solid var(--rule);
+  padding: 28px 20px;
+  text-align: center;
+  color: var(--muted);
+  font-family: "Fraunces", serif;
+  font-style: italic;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.no-data .nd-title {
+  font-family: "IBM Plex Mono", monospace;
+  font-style: normal;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 8px;
+  color: var(--ink);
+}
+
+/* Trade section */
+.trade-section {
+  border-top: 1px solid var(--ink);
+  padding-top: 20px;
+}
+.trade-section h3 {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 12px;
+}
+.trade-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+}
+@media (max-width: 800px) {
+  .trade-grid { grid-template-columns: 1fr; }
+}
+.trade-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.trade-bar-row {
+  display: grid;
+  grid-template-columns: 130px 1fr 90px;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+}
+.trade-bar-row .country {
+  font-family: "Inter", sans-serif;
+  font-size: 13px;
+  text-align: right;
+}
+.trade-bar-row .bar-track {
+  background: var(--rule-soft);
+  height: 14px;
+  position: relative;
+}
+.trade-bar-row .bar-fill {
+  height: 100%;
+  background: var(--accent-3);
+}
+.trade-bar-row.refined .bar-fill { background: var(--accent-2); }
+.trade-bar-row .figure {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* ─────────────────────── Layer 4: Compare ─────────────────────── */
+.compare-controls {
+  margin-bottom: 24px;
+  padding: 16px;
+  background: var(--paper-2);
+  border: 1px solid var(--rule-soft);
+}
+.compare-controls .label {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  margin-bottom: 10px;
+  display: block;
+}
+.compare-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.compare-picker button {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 5px 10px;
+  background: none;
+  border: 1px solid var(--rule);
+  color: var(--muted);
+  cursor: pointer;
+}
+.compare-picker button.active {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+.compare-charts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+@media (max-width: 800px) {
+  .compare-charts { grid-template-columns: 1fr; }
+}
+.compare-chart-block h4 {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 8px;
+}
+
+/* ─────────────────────── Layer 3: Methodology drawer ─────────────────────── */
+.drawer-trigger {
+  position: fixed;
+  bottom: 0;
+  right: 24px;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 10px 16px;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  border: none;
+  z-index: 30;
+}
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 480px;
+  max-width: 100%;
+  height: 100vh;
+  background: var(--paper);
+  border-left: 1px solid var(--ink);
+  transform: translateX(100%);
+  transition: transform 0.25s ease;
+  overflow-y: auto;
+  z-index: 40;
+  padding: 24px 28px 80px;
+  box-shadow: -8px 0 24px rgba(0,0,0,0.06);
+}
+.drawer.open { transform: translateX(0); }
+.drawer .close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: 1px solid var(--rule);
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  font-family: "IBM Plex Mono", monospace;
+}
+.drawer h3 {
+  font-family: "Fraunces", serif;
+  font-weight: 600;
+  font-size: 22px;
+  margin-bottom: 4px;
+}
+.drawer .drawer-sub {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  margin-bottom: 24px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--rule);
+}
+.drawer h4 {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin: 22px 0 8px;
+  color: var(--accent);
+}
+.drawer p, .drawer li {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #2a2a2a;
+  margin-bottom: 8px;
+}
+.drawer ul { padding-left: 16px; margin-bottom: 12px; }
+.drawer .source-note {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  color: var(--muted);
+  background: var(--paper-2);
+  padding: 10px 12px;
+  margin-top: 6px;
+  border-left: 2px solid var(--rule);
+}
+
+/* Tooltip */
+.tip {
+  position: absolute;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  padding: 6px 10px;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 50;
+  opacity: 0;
+  transition: opacity 0.1s;
+}
+.tip.show { opacity: 1; }
+
+/* Footer */
+footer.colophon {
+  margin-top: 64px;
+  padding-top: 20px;
+  border-top: 1px solid var(--ink);
+  display: flex;
+  justify-content: space-between;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+/* Loading state */
+.loading {
+  text-align: center;
+  padding: 64px 20px;
+  font-family: "Fraunces", serif;
+  font-style: italic;
+  color: var(--muted);
+}
+
+/* Hidden tab content */
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+<header class="masthead">
+  <div>
+    <div class="title serif">CriMinGeo</div>
+    <div class="subtitle">A panorama of critical mineral supply chains, 2000–2023</div>
+  </div>
+  <div class="meta">
+    Critical Minerals & Geoeconomics<br>
+    IAE-CSIC · PI: Christopher Rauh
+  </div>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button class="tab active" data-tab="overview">Overview</button>
+  <button class="tab" data-tab="profile">Mineral profile</button>
+  <button class="tab" data-tab="compare">Compare minerals</button>
+</nav>
+
+<!-- LAYER 0: OVERVIEW ─────────────────────────────────────────────────────── -->
+<section id="tab-overview" class="tab-pane active">
+  <div class="overview-intro">
+    <div>
+      <h2 class="serif">Where the chokepoints are.</h2>
+      <p>This dashboard maps the global supply chain of thirteen critical minerals across three stages — extraction, processing, and trade — between 2000 and 2023. The matrix below shows, for each mineral and each stage, how concentrated production is in its leading country in the most recent year of available data. Hatched cells indicate stages for which public country-level data is not currently in the dataset; in many cases, this is because such data is not produced by the standard public sources. Click any row to drill into a mineral profile.</p>
+    </div>
+    <div class="overview-controls">
+      <span class="label">Heat metric</span>
+      <div class="toggle-group" id="metric-toggle">
+        <button class="active" data-metric="top1">Top-1 share</button>
+        <button data-metric="hhi">HHI</button>
+      </div>
+      <span class="label" style="margin-top:8px;">Latest year shown per mineral.</span>
+    </div>
+  </div>
+
+  <div id="overview-matrix-container"></div>
+
+  <div class="legend-row">
+    <div class="heat-scale">
+      <span>Low concentration</span>
+      <div class="scale-bar">
+        <div style="background: var(--heat-0)"></div>
+        <div style="background: var(--heat-1)"></div>
+        <div style="background: var(--heat-2)"></div>
+        <div style="background: var(--heat-3)"></div>
+        <div style="background: var(--heat-4)"></div>
+      </div>
+      <span>High concentration</span>
+    </div>
+    <div>
+      <span style="display:inline-block; width:14px; height:10px; background: repeating-linear-gradient(45deg, var(--paper-2), var(--paper-2) 3px, var(--rule-soft) 3px, var(--rule-soft) 6px); border:1px solid var(--rule); vertical-align:middle; margin-right:6px;"></span>
+      Data not available
+    </div>
+  </div>
+</section>
+
+<!-- LAYER 1: MINERAL PROFILE ─────────────────────────────────────────────── -->
+<section id="tab-profile" class="tab-pane">
+  <div class="profile-header">
+    <h2 id="profile-title" class="serif">—</h2>
+    <div class="mineral-picker" id="mineral-picker"></div>
+  </div>
+
+  <div class="headline" id="profile-headline">Loading…</div>
+
+  <div class="year-controls">
+    <span>Year</span>
+    <input type="range" id="year-slider" min="2000" max="2023" value="2023" step="1">
+    <span class="year-display" id="year-display">2023</span>
+  </div>
+
+  <div class="stages">
+    <div class="stage-panel stage-mining" id="panel-mining">
+      <div class="stage-header">
+        <span class="stage-title">Mining / extraction</span>
+        <span class="stage-units mono" id="mining-units">—</span>
+      </div>
+      <div class="stage-stats" id="mining-stats"></div>
+      <div class="chart-container" id="mining-chart"></div>
+    </div>
+    <div class="stage-panel stage-refining" id="panel-refining">
+      <div class="stage-header">
+        <span class="stage-title">Refining / processing</span>
+        <span class="stage-units mono" id="refining-units">—</span>
+      </div>
+      <div class="stage-stats" id="refining-stats"></div>
+      <div class="chart-container" id="refining-chart"></div>
+    </div>
+  </div>
+
+  <div class="trade-section">
+    <h3>Trade flows — UN Comtrade (USD value)</h3>
+    <div class="year-controls" style="margin-bottom:14px;">
+      <span>Stage</span>
+      <div class="toggle-group" style="max-width:280px;" id="trade-stage-toggle">
+        <button class="active" data-stage="primary">Primary form</button>
+        <button data-stage="refined">Refined form</button>
+      </div>
+      <span style="margin-left:auto;">Year shown matches the slider above.</span>
+    </div>
+    <div class="trade-grid">
+      <div>
+        <h4 style="font-family:'IBM Plex Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:8px;">Top exporters</h4>
+        <div class="trade-bars" id="trade-exporters"></div>
+      </div>
+      <div>
+        <h4 style="font-family:'IBM Plex Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:8px;">Top importers</h4>
+        <div class="trade-bars" id="trade-importers"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LAYER 4: COMPARE ─────────────────────────────────────────────────────── -->
+<section id="tab-compare" class="tab-pane">
+  <h2 class="serif" style="font-size:24px;font-weight:500;margin-bottom:8px;">Cross-mineral comparison</h2>
+  <p style="color:var(--muted);margin-bottom:20px;max-width:720px;">Select up to four minerals to compare top-1 country shares and concentration (HHI) over time. Useful for asking whether the grip of dominant producers is tightening uniformly across critical minerals or only in specific cases.</p>
+  <div class="compare-controls">
+    <span class="label">Minerals (click to toggle, max 4)</span>
+    <div class="compare-picker" id="compare-picker"></div>
+  </div>
+  <div class="compare-charts">
+    <div class="compare-chart-block">
+      <h4>Mining — Top-1 country share (%)</h4>
+      <div id="compare-mining-top1"></div>
+    </div>
+    <div class="compare-chart-block">
+      <h4>Mining — HHI</h4>
+      <div id="compare-mining-hhi"></div>
+    </div>
+    <div class="compare-chart-block">
+      <h4>Refining — Top-1 country share (%)</h4>
+      <div id="compare-refining-top1"></div>
+    </div>
+    <div class="compare-chart-block">
+      <h4>Refining — HHI</h4>
+      <div id="compare-refining-hhi"></div>
+    </div>
+  </div>
+</section>
+
+<footer class="colophon">
+  <div>CriMinGeo dashboard · v1 · build: <span id="build-date">—</span></div>
+  <div>Data: BGS · USGS MCS · UN Comtrade</div>
+</footer>
+
+</div>
+
+<button class="drawer-trigger" id="drawer-trigger">Methodology &amp; sources →</button>
+
+<div class="drawer" id="drawer">
+  <button class="close" id="drawer-close">×</button>
+  <h3 class="serif" id="drawer-title">Methodology &amp; sources</h3>
+  <div class="drawer-sub" id="drawer-sub">Context-aware notes</div>
+  <div id="drawer-content">
+    <h4>About this dashboard</h4>
+    <p>This is a working v1 built for the CriMinGeo project (IAE-CSIC). It is a descriptive panorama, not a forecasting tool. Selections in the main view drive the contextual notes shown here.</p>
+
+    <h4>Time window</h4>
+    <p>All series are shown for 2000–2023. This window is set by UN Comtrade availability rather than by mining data: BGS series go back to 1971 but trade data is reliable from 2000 onwards. The full BGS history is preserved in the underlying repository.</p>
+
+    <h4>Production data — BGS</h4>
+    <p>Country-level production figures come from the British Geological Survey World Mineral Statistics. Within each commodity file, the column <span class="mono">bgs_commodity_trans</span> distinguishes stages (e.g. "cobalt, mine" vs "cobalt, refined"). The build script classifies these into two canonical stages — <em>mining</em> and <em>refining</em> — using keyword matching. Rows whose stage cannot be determined are dropped.</p>
+    <div class="source-note">Source: bgs.ac.uk / World Mineral Statistics dataset, accessed for this build.</div>
+
+    <h4>Trade data — UN Comtrade</h4>
+    <p>Bilateral trade flows by HS code, downloaded via UN Comtrade API. Each mineral file carries a <span class="mono">stage</span> column ("primary" or "refined") set by the upstream download script based on which HS code the row belongs to. Values shown are USD (<span class="mono">primaryValue</span>); bilateral flows only — rows where the partner is "World" are excluded.</p>
+    <p><em>Caveat:</em> HS codes are an imperfect proxy for the mining/refining distinction. Some stages are reported under codes that lump multiple stages together; some products move under codes that don't cleanly correspond to either category. See per-mineral notes when a profile is selected.</p>
+    <div class="source-note">Source: comtrade.un.org via official API.</div>
+
+    <h4>Reserves</h4>
+    <p>Reserves estimates from USGS Mineral Commodity Summaries 2025 are present in the underlying data but not yet integrated into the dashboard view; this is a deliberate v1 scoping choice and a slot is reserved for adding the reserves-vs-production comparison in a later iteration.</p>
+
+    <h4>Concentration metrics</h4>
+    <p><strong>Top-1 share</strong> is the percentage of global production accounted for by the leading country in a given year. <strong>HHI</strong> (Herfindahl-Hirschman Index) is the sum of squared shares (each in percentage points), ranging from near 0 (perfect competition) to 10,000 (single-country monopoly). HHI above 2,500 is conventionally read as "highly concentrated"; above 5,000 indicates extreme concentration.</p>
+
+    <h4>Country names</h4>
+    <p>Source files use different country naming conventions (BGS uses "Congo, Democratic Republic"; Comtrade uses "Dem. Rep. of the Congo"; USGS MCS uses "Congo (Kinshasa)"). The build script harmonizes these to a single canonical short name. The harmonization map covers the top producers cleanly; the long tail of small producers may show inconsistencies and is being expanded iteratively.</p>
+
+    <h4>Mineral-specific notes</h4>
+    <p id="mineral-specific-notes" style="color:var(--muted); font-style:italic;">Select a mineral profile to see notes specific to its data.</p>
+
+    <h4>Build &amp; reproducibility</h4>
+    <p>Generated by <span class="mono">code/build_dashboard_data.py</span> from raw CSVs in <span class="mono">data/source/</span>. To rebuild after new data lands: replace the source files, re-run the script, commit the regenerated <span class="mono">docs/data/*.json</span> files. No server required — the dashboard is a static page.</p>
+  </div>
+</div>
+
+<div class="tip" id="tooltip"></div>
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────
+// State + data loading
+// ─────────────────────────────────────────────────────────────────────────
+
+const STATE = {
+  manifest: null,
+  overview: null,
+  profiles: {},          // mineral_key -> profile data (loaded lazily)
+  currentMineral: null,
+  currentYear: 2023,
+  metric: "top1",
+  tradeStage: "primary",
+  compareSelected: ["cobalt", "ree"],  // defaults
+};
+
+const COLOR_PALETTE = [
+  "#8a3324", "#2c4a3e", "#4a4a8a", "#a55c1b", "#5b6e3d",
+  "#7a4a8c", "#3a6e8a", "#8a6e3a", "#6e3a4a", "#3a8a6e",
+  "#5a3a8a", "#8a8a3a", "#3a4a8a"
+];
+
+const heatColor = (pct, metric) => {
+  // Map either top1_share (0-100) or hhi (0-10000) to heat scale
+  let t;
+  if (metric === "top1") {
+    t = pct / 100;
+  } else {
+    t = Math.min(1, pct / 8000);
+  }
+  if (t < 0.2) return "var(--heat-0)";
+  if (t < 0.4) return "var(--heat-1)";
+  if (t < 0.6) return "var(--heat-2)";
+  if (t < 0.8) return "var(--heat-3)";
+  return "var(--heat-4)";
+};
+
+async function loadJSON(path) {
+  const r = await fetch(path);
+  if (!r.ok) throw new Error("Failed to load " + path);
+  return r.json();
+}
+
+async function loadProfile(key) {
+  if (STATE.profiles[key]) return STATE.profiles[key];
+  const p = await loadJSON("data/" + key + ".json");
+  STATE.profiles[key] = p;
+  return p;
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Tabs
+// ─────────────────────────────────────────────────────────────────────────
+document.getElementById("tabs").addEventListener("click", (e) => {
+  if (!e.target.classList.contains("tab")) return;
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  document.querySelectorAll(".tab-pane").forEach(p => p.classList.remove("active"));
+  e.target.classList.add("active");
+  document.getElementById("tab-" + e.target.dataset.tab).classList.add("active");
+  if (e.target.dataset.tab === "compare") renderCompare();
+});
+
+// ─────────────────────────────────────────────────────────────────────────
+// LAYER 0: Overview matrix
+// ─────────────────────────────────────────────────────────────────────────
+function renderOverviewMatrix() {
+  const c = document.getElementById("overview-matrix-container");
+  const minerals = STATE.manifest.minerals;
+  const data = STATE.overview.overview;
+
+  const byMineral = {};
+  data.forEach(row => {
+    if (!byMineral[row.mineral_key]) byMineral[row.mineral_key] = {};
+    byMineral[row.mineral_key][row.stage] = row;
+  });
+
+  let html = '<div class="overview-matrix">';
+  html += '<div class="matrix-header">Mineral</div>';
+  html += '<div class="matrix-header">Mining / extraction</div>';
+  html += '<div class="matrix-header">Refining / processing</div>';
+
+  minerals.forEach(m => {
+    const row = byMineral[m.key] || {};
+    html += '<div class="matrix-row" data-mineral="' + m.key + '">';
+    html += '<div class="matrix-mineral">' + m.label + '</div>';
+    ["mining", "refining"].forEach(stage => {
+      const r = row[stage];
+      if (!r || !r.available) {
+        html += '<div class="matrix-cell na"><div class="heat-square na"></div><div class="desc"><span class="country">No data in v1</span></div></div>';
+      } else {
+        const value = STATE.metric === "top1" ? r.top1_share : r.hhi;
+        const color = heatColor(value, STATE.metric);
+        const valueStr = STATE.metric === "top1"
+          ? r.top1_share.toFixed(1) + "% · " + r.latest_year
+          : "HHI " + Math.round(r.hhi).toLocaleString() + " · " + r.latest_year;
+        html += '<div class="matrix-cell"><div class="heat-square" style="background:' + color + '"></div><div class="desc"><span class="country">' + r.top1_country + '</span><br><span class="figure">' + valueStr + '</span></div></div>';
+      }
+    });
+    html += '</div>';
+  });
+
+  html += '</div>';
+  c.innerHTML = html;
+
+  // Click to drill in
+  c.querySelectorAll(".matrix-row").forEach(el => {
+    el.addEventListener("click", () => {
+      const key = el.dataset.mineral;
+      switchToProfile(key);
+    });
+  });
+}
+
+document.getElementById("metric-toggle").addEventListener("click", (e) => {
+  if (!e.target.dataset.metric) return;
+  STATE.metric = e.target.dataset.metric;
+  document.querySelectorAll("#metric-toggle button").forEach(b => b.classList.remove("active"));
+  e.target.classList.add("active");
+  renderOverviewMatrix();
+});
+
+// ─────────────────────────────────────────────────────────────────────────
+// LAYER 1: Mineral profile
+// ─────────────────────────────────────────────────────────────────────────
+
+function renderMineralPicker() {
+  const c = document.getElementById("mineral-picker");
+  const minerals = STATE.manifest.minerals;
+  let html = "";
+  minerals.forEach(m => {
+    html += '<button data-mineral="' + m.key + '">' + m.label + '</button>';
+  });
+  c.innerHTML = html;
+  c.addEventListener("click", (e) => {
+    if (e.target.tagName !== "BUTTON") return;
+    switchToProfile(e.target.dataset.mineral);
+  });
+}
+
+function switchToProfile(mineralKey) {
+  // Switch tab
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  document.querySelector('.tab[data-tab="profile"]').classList.add("active");
+  document.querySelectorAll(".tab-pane").forEach(p => p.classList.remove("active"));
+  document.getElementById("tab-profile").classList.add("active");
+  // Load
+  STATE.currentMineral = mineralKey;
+  document.querySelectorAll("#mineral-picker button").forEach(b => {
+    b.classList.toggle("active", b.dataset.mineral === mineralKey);
+  });
+  renderProfile();
+}
+
+async function renderProfile() {
+  const key = STATE.currentMineral;
+  if (!key) return;
+  const p = await loadProfile(key);
+
+  document.getElementById("profile-title").textContent = p.label;
+
+  // Set year slider bounds based on actual data
+  const slider = document.getElementById("year-slider");
+  slider.min = p.year_min;
+  slider.max = p.year_max;
+  if (STATE.currentYear < p.year_min || STATE.currentYear > p.year_max) {
+    STATE.currentYear = p.year_max;
+    slider.value = p.year_max;
+  }
+  document.getElementById("year-display").textContent = STATE.currentYear;
+
+  renderHeadline(p);
+  renderStagePanel("mining", p.mining);
+  renderStagePanel("refining", p.refining);
+  renderTrade(p);
+  updateMineralSpecificNotes(p);
+}
+
+function renderHeadline(p) {
+  const el = document.getElementById("profile-headline");
+  const y = STATE.currentYear;
+  let parts = [];
+  parts.push("In <strong>" + y + "</strong>,");
+
+  if (p.mining && p.mining.metrics[y]) {
+    const m = p.mining.metrics[y];
+    parts.push('<strong>' + m.top1_country + '</strong> mined <strong>' + m.top1_share.toFixed(1) + '%</strong> of global ' + p.label.toLowerCase() + ' (HHI ' + Math.round(m.hhi).toLocaleString() + ')');
+  } else {
+    parts.push('mining data is not available');
+  }
+
+  if (p.refining && p.refining.metrics[y]) {
+    const r = p.refining.metrics[y];
+    parts.push('and <strong>' + r.top1_country + '</strong> refined <strong>' + r.top1_share.toFixed(1) + '%</strong>');
+  }
+
+  el.innerHTML = parts.join(" ") + ".";
+}
+
+function renderStagePanel(stage, data) {
+  const panel = document.getElementById("panel-" + stage);
+  const statsEl = document.getElementById(stage + "-stats");
+  const chartEl = document.getElementById(stage + "-chart");
+  const unitsEl = document.getElementById(stage + "-units");
+
+  if (!data) {
+    unitsEl.textContent = "";
+    statsEl.innerHTML = "";
+    chartEl.innerHTML = '<div class="no-data"><div class="nd-title">Not in v1</div>Country-level ' + stage + ' data is not yet integrated for this mineral. For some minerals (e.g. lithium, graphite, antimony, tungsten, individual REEs) the standard public sources do not produce country-level refined-stage figures. See methodology drawer for details.</div>';
+    return;
+  }
+
+  unitsEl.textContent = data.units;
+
+  const y = STATE.currentYear;
+  const m = data.metrics[y];
+  if (m) {
+    statsEl.innerHTML = `
+      <div class="stat"><div class="stat-label">Top producer</div><div class="stat-value serif">${m.top1_country}</div><div class="stat-sub">${m.top1_share.toFixed(1)}% share</div></div>
+      <div class="stat"><div class="stat-label">Top-3 share</div><div class="stat-value serif">${m.top3_share.toFixed(1)}%</div><div class="stat-sub">${m.n_producers} producers reporting</div></div>
+      <div class="stat"><div class="stat-label">HHI</div><div class="stat-value serif">${Math.round(m.hhi).toLocaleString()}</div><div class="stat-sub">${m.hhi > 5000 ? "extreme" : m.hhi > 2500 ? "high" : m.hhi > 1500 ? "moderate" : "competitive"}</div></div>
+    `;
+  } else {
+    statsEl.innerHTML = '<div class="stat"><div class="stat-label">No data for ' + y + '</div></div>';
+  }
+
+  drawStackedArea(chartEl, data, stage);
+}
+
+function drawStackedArea(container, data, stage) {
+  container.innerHTML = "";
+  const w = container.clientWidth;
+  const h = 260;
+  const margin = {top: 10, right: 8, bottom: 26, left: 44};
+  const innerW = w - margin.left - margin.right;
+  const innerH = h - margin.top - margin.bottom;
+
+  const series = data.series;
+  const countries = Object.keys(series);
+  const yMin = STATE.manifest.year_min;
+  const yMax = STATE.manifest.year_max;
+  const years = d3.range(yMin, yMax + 1);
+
+  // Build stack data: array of {year, country1: v, country2: v, ...}
+  const stackData = years.map(yr => {
+    const o = {year: yr};
+    countries.forEach(c => { o[c] = series[c][yr] || 0; });
+    return o;
+  });
+
+  // Order: top countries first (largest at the bottom, "Other" last/top)
+  const order = countries.slice().sort((a, b) => {
+    if (a === "Other") return 1;
+    if (b === "Other") return -1;
+    const aTotal = years.reduce((s, y) => s + (series[a][y] || 0), 0);
+    const bTotal = years.reduce((s, y) => s + (series[b][y] || 0), 0);
+    return bTotal - aTotal;
+  });
+
+  const stack = d3.stack().keys(order)(stackData);
+
+  const xScale = d3.scaleLinear().domain([yMin, yMax]).range([0, innerW]);
+  const yMaxValue = d3.max(stack[stack.length - 1], d => d[1]);
+  const yScale = d3.scaleLinear().domain([0, yMaxValue]).range([innerH, 0]);
+
+  // Color
+  const color = (country, i) => {
+    if (country === "Other") return "#bcb6a8";
+    return COLOR_PALETTE[i % COLOR_PALETTE.length];
+  };
+
+  const svg = d3.select(container).append("svg")
+    .attr("class", "chart-svg")
+    .attr("viewBox", `0 0 ${w} ${h}`);
+  const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+  // Areas
+  const area = d3.area()
+    .x(d => xScale(d.data.year))
+    .y0(d => yScale(d[0]))
+    .y1(d => yScale(d[1]))
+    .curve(d3.curveMonotoneX);
+
+  stack.forEach((layer, i) => {
+    g.append("path")
+      .datum(layer)
+      .attr("fill", color(order[i], i))
+      .attr("stroke", "var(--paper)")
+      .attr("stroke-width", 0.5)
+      .attr("d", area);
+  });
+
+  // Axes
+  const xAxis = d3.axisBottom(xScale).tickFormat(d3.format("d")).ticks(6);
+  g.append("g")
+    .attr("transform", `translate(0,${innerH})`)
+    .call(xAxis)
+    .call(g => g.select(".domain").attr("stroke", "var(--ink)"))
+    .call(g => g.selectAll("text").attr("fill", "var(--muted)").style("font-family", "IBM Plex Mono").style("font-size", "10px"));
+
+  const yAxis = d3.axisLeft(yScale).ticks(5).tickFormat(d => {
+    if (d >= 1e6) return (d/1e6).toFixed(1) + "M";
+    if (d >= 1e3) return (d/1e3).toFixed(0) + "k";
+    return d;
+  });
+  g.append("g")
+    .call(yAxis)
+    .call(g => g.select(".domain").attr("stroke", "var(--ink)"))
+    .call(g => g.selectAll(".tick line").attr("stroke", "var(--rule-soft)"))
+    .call(g => g.selectAll("text").attr("fill", "var(--muted)").style("font-family", "IBM Plex Mono").style("font-size", "10px"));
+
+  // Year highlight line
+  const xPos = xScale(STATE.currentYear);
+  g.append("line")
+    .attr("x1", xPos).attr("x2", xPos)
+    .attr("y1", 0).attr("y2", innerH)
+    .attr("stroke", "var(--ink)")
+    .attr("stroke-width", 1)
+    .attr("stroke-dasharray", "2,2");
+
+  // Legend
+  const legend = document.createElement("div");
+  legend.className = "chart-legend";
+  order.forEach((country, i) => {
+    const item = document.createElement("span");
+    item.className = "legend-item";
+    item.innerHTML = '<span class="legend-swatch" style="background:' + color(country, i) + '"></span>' + country;
+    legend.appendChild(item);
+  });
+  container.appendChild(legend);
+}
+
+function renderTrade(p) {
+  const exEl = document.getElementById("trade-exporters");
+  const imEl = document.getElementById("trade-importers");
+
+  if (!p.trade || !p.trade[STATE.tradeStage]) {
+    exEl.innerHTML = '<div class="no-data" style="grid-column: span 2;"><div class="nd-title">No trade data</div>Trade data for this mineral / stage is not available.</div>';
+    imEl.innerHTML = "";
+    return;
+  }
+
+  const y = STATE.currentYear;
+  const stageData = p.trade[STATE.tradeStage];
+  const exporters = stageData.exporters[y];
+  const importers = stageData.importers[y];
+
+  function render(list, container, isRefined) {
+    if (!list || !list.top.length) {
+      container.innerHTML = '<div class="no-data"><div class="nd-title">No data for ' + y + '</div></div>';
+      return;
+    }
+    const max = list.top[0].value_usd;
+    let html = "";
+    list.top.forEach(r => {
+      const pct = (r.value_usd / max * 100);
+      const valStr = r.value_usd >= 1e9 ? "$" + (r.value_usd/1e9).toFixed(1) + "B" : "$" + (r.value_usd/1e6).toFixed(0) + "M";
+      html += `<div class="trade-bar-row${isRefined ? ' refined' : ''}"><div class="country">${r.country}</div><div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div><div class="figure">${valStr} · ${r.share_pct.toFixed(1)}%</div></div>`;
+    });
+    container.innerHTML = html;
+  }
+  const isRefined = STATE.tradeStage === "refined";
+  render(exporters, exEl, isRefined);
+  render(importers, imEl, isRefined);
+}
+
+document.getElementById("year-slider").addEventListener("input", (e) => {
+  STATE.currentYear = +e.target.value;
+  document.getElementById("year-display").textContent = STATE.currentYear;
+  if (STATE.currentMineral) renderProfile();
+});
+
+document.getElementById("trade-stage-toggle").addEventListener("click", (e) => {
+  if (!e.target.dataset.stage) return;
+  STATE.tradeStage = e.target.dataset.stage;
+  document.querySelectorAll("#trade-stage-toggle button").forEach(b => b.classList.remove("active"));
+  e.target.classList.add("active");
+  if (STATE.currentMineral && STATE.profiles[STATE.currentMineral]) {
+    renderTrade(STATE.profiles[STATE.currentMineral]);
+  }
+});
+
+function updateMineralSpecificNotes(p) {
+  const el = document.getElementById("mineral-specific-notes");
+  let notes = [];
+  if (p.key === "lithium") {
+    notes.push("BGS reports lithium production under multiple sub-categories (gross mineral tonnage, Li content, specific minerals like spodumene). The dashboard sums across all sub-categories without converting to a common unit. Treat the absolute numbers as indicative and the country shares as the more reliable signal. Refined lithium (carbonate, hydroxide) is not reported by country in public sources.");
+  }
+  if (p.key === "ree") {
+    notes.push("Rare earths data aggregates across all individual REEs and reporting forms (ore minerals, oxides). Country-level data on individual REE production (Nd, Dy, Tb) is not available in public BGS series; total refined REE production by country is also not in public sources (Wood Mackenzie, paid).");
+  }
+  if (p.key === "manganese") {
+    notes.push("Manganese mining figures come from the BGS manganese file (gross ore weight). Refining figures cover ferromanganese and silicomanganese production from the BGS ferroalloys file — these are metallurgical-grade ferroalloys used in steelmaking, NOT battery-grade manganese sulphate (MnSO₄), which is not reported by country in public sources. <strong>Important caveat:</strong> China appears to be absent from BGS ferroalloys data and is therefore not reflected in the refining stage shown here. China is in fact a major producer of ferromanganese; the figures shown should be read as a lower bound on global production and as a partial picture of country shares.");
+  }
+  if (p.key === "cobalt") {
+    notes.push("Cobalt is one of the cleanest cases: BGS reports both mine and refined production by country. Note that the trade panel shows the DRC as a major 'refined' exporter, but this reflects HS-code conventions — much of what leaves DRC is cobalt hydroxide / concentrate, classified under product codes that the upstream pipeline labels as refined. The BGS refined panel is the more direct measure of refining.");
+  }
+  if (p.key === "pgms") {
+    notes.push("BGS reports both 'platinum group metals, mine' and refined PGM production. In practice these are nearly identical figures attributed to the same countries (because PGM mine output is typically reported as contained metal, and most producing countries also smelt domestically). To avoid implying a separate refining stage exists where it largely does not, the dashboard shows mining only. The refined data is preserved in the underlying source files.");
+  }
+  if (p.key === "gallium") {
+    notes.push("Gallium has no mining stage. It is recovered as a byproduct of bauxite-to-alumina processing and zinc metallurgy. The figure shown under 'Refining' is the BGS 'gallium, primary' series — the first country-level production datum that exists for this metal. The empty mining panel reflects the upstream supply chain reality, not a data gap.");
+  }
+  if (p.key === "germanium") {
+    notes.push("Germanium has no mining stage. It is mainly a byproduct of zinc mining, and can also be extracted from coal ash. The figure shown under 'Refining' is the BGS 'germanium metal' series — the first country-level production datum that exists. The empty mining panel reflects the upstream supply chain, not missing data.");
+  }
+  if (p.key === "magnesium") {
+    notes.push("Magnesium metal is extracted from dolomite, magnesite, or brines, but the upstream mineral tonnage attributable specifically to magnesium production is not reported by country. The figure shown under 'Refining' is the BGS 'magnesium metal, primary' series — the first country-level production datum that exists. The empty mining panel reflects the data gap upstream of the metallurgical stage.");
+  }
+  if (p.key === "antimony") {
+    notes.push("BGS reports antimony mine production by country. Refined antimony (smelted/recovered metal) is not reported by country in public BGS series.");
+  }
+  if (p.key === "tungsten") {
+    notes.push("BGS reports tungsten mine production by country. Refined tungsten products (APT, ferrotungsten, tungsten metal) are not reported by country in public BGS series.");
+  }
+  if (p.key === "graphite") {
+    notes.push("BGS reports natural graphite production under a single label 'graphite' (no further stage breakdown). Natural graphite is extracted directly, so this figure represents the mining stage. Refined / spherical graphite (used in battery anodes) is not reported by country in public sources — this is one of the data gaps documented by the EU's JRC RMIS.");
+  }
+  if (notes.length === 0) {
+    el.innerHTML = "<em>No mineral-specific notes for " + p.label + " in this build.</em>";
+  } else {
+    el.innerHTML = notes.map(n => "<p>" + n + "</p>").join("");
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// LAYER 4: Compare
+// ─────────────────────────────────────────────────────────────────────────
+
+function renderComparePicker() {
+  const c = document.getElementById("compare-picker");
+  let html = "";
+  STATE.manifest.minerals.forEach(m => {
+    const active = STATE.compareSelected.includes(m.key);
+    html += '<button data-mineral="' + m.key + '" class="' + (active ? "active" : "") + '">' + m.label + '</button>';
+  });
+  c.innerHTML = html;
+  c.addEventListener("click", (e) => {
+    if (e.target.tagName !== "BUTTON") return;
+    const k = e.target.dataset.mineral;
+    if (STATE.compareSelected.includes(k)) {
+      STATE.compareSelected = STATE.compareSelected.filter(x => x !== k);
+    } else if (STATE.compareSelected.length < 4) {
+      STATE.compareSelected.push(k);
+    }
+    renderComparePicker();
+    renderCompare();
+  });
+}
+
+async function renderCompare() {
+  // Ensure all selected profiles loaded
+  const profiles = await Promise.all(STATE.compareSelected.map(loadProfile));
+
+  drawCompareLine("compare-mining-top1", profiles, "mining", "top1_share", "%");
+  drawCompareLine("compare-mining-hhi", profiles, "mining", "hhi", "");
+  drawCompareLine("compare-refining-top1", profiles, "refining", "top1_share", "%");
+  drawCompareLine("compare-refining-hhi", profiles, "refining", "hhi", "");
+}
+
+function drawCompareLine(containerId, profiles, stage, field, suffix) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = "";
+  const w = container.clientWidth;
+  const h = 220;
+  const margin = {top: 10, right: 8, bottom: 26, left: 42};
+  const innerW = w - margin.left - margin.right;
+  const innerH = h - margin.top - margin.bottom;
+
+  const yMin = STATE.manifest.year_min;
+  const yMax = STATE.manifest.year_max;
+  const years = d3.range(yMin, yMax + 1);
+
+  // Collect series
+  const lines = [];
+  profiles.forEach((p, i) => {
+    if (!p[stage]) return;
+    const m = p[stage].metrics;
+    const pts = [];
+    years.forEach(y => {
+      if (m[y] != null) pts.push({year: y, value: m[y][field]});
+    });
+    if (pts.length) lines.push({label: p.label, key: p.key, points: pts, color: COLOR_PALETTE[i]});
+  });
+
+  if (lines.length === 0) {
+    container.innerHTML = '<div class="no-data" style="padding:20px;font-size:12px;">No data for selected minerals at this stage.</div>';
+    return;
+  }
+
+  const xScale = d3.scaleLinear().domain([yMin, yMax]).range([0, innerW]);
+  const allValues = lines.flatMap(l => l.points.map(p => p.value));
+  const yScale = d3.scaleLinear()
+    .domain([0, d3.max(allValues) * 1.05])
+    .range([innerH, 0]);
+
+  const svg = d3.select(container).append("svg")
+    .attr("class", "chart-svg")
+    .attr("viewBox", `0 0 ${w} ${h}`);
+  const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+  // Axes
+  g.append("g")
+    .attr("transform", `translate(0,${innerH})`)
+    .call(d3.axisBottom(xScale).tickFormat(d3.format("d")).ticks(6))
+    .call(g => g.select(".domain").attr("stroke", "var(--ink)"))
+    .call(g => g.selectAll("text").attr("fill", "var(--muted)").style("font-family", "IBM Plex Mono").style("font-size", "10px"));
+
+  g.append("g")
+    .call(d3.axisLeft(yScale).ticks(5).tickFormat(d => suffix === "%" ? d + "%" : Math.round(d).toLocaleString()))
+    .call(g => g.select(".domain").attr("stroke", "var(--ink)"))
+    .call(g => g.selectAll(".tick line").attr("stroke", "var(--rule-soft)"))
+    .call(g => g.selectAll("text").attr("fill", "var(--muted)").style("font-family", "IBM Plex Mono").style("font-size", "10px"));
+
+  const lineGen = d3.line()
+    .x(d => xScale(d.year))
+    .y(d => yScale(d.value))
+    .curve(d3.curveMonotoneX);
+
+  lines.forEach(l => {
+    g.append("path")
+      .datum(l.points)
+      .attr("fill", "none")
+      .attr("stroke", l.color)
+      .attr("stroke-width", 2)
+      .attr("d", lineGen);
+  });
+
+  // Mini legend
+  const legend = document.createElement("div");
+  legend.className = "chart-legend";
+  lines.forEach(l => {
+    const item = document.createElement("span");
+    item.className = "legend-item";
+    item.innerHTML = '<span class="legend-swatch" style="background:' + l.color + '"></span>' + l.label;
+    legend.appendChild(item);
+  });
+  container.appendChild(legend);
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Drawer
+// ─────────────────────────────────────────────────────────────────────────
+document.getElementById("drawer-trigger").addEventListener("click", () => {
+  document.getElementById("drawer").classList.add("open");
+});
+document.getElementById("drawer-close").addEventListener("click", () => {
+  document.getElementById("drawer").classList.remove("open");
+});
+
+// ─────────────────────────────────────────────────────────────────────────
+// Init
+// ─────────────────────────────────────────────────────────────────────────
+async function init() {
+  try {
+    STATE.manifest = await loadJSON("data/manifest.json");
+    STATE.overview = await loadJSON("data/overview.json");
+
+    document.getElementById("build-date").textContent = new Date().toISOString().slice(0, 10);
+
+    renderOverviewMatrix();
+    renderMineralPicker();
+    renderComparePicker();
+
+    // Default mineral (first available)
+    const firstAvailable = STATE.manifest.minerals.find(m => m.has_mining);
+    if (firstAvailable) {
+      STATE.currentMineral = firstAvailable.key;
+      document.querySelectorAll("#mineral-picker button").forEach(b => {
+        b.classList.toggle("active", b.dataset.mineral === firstAvailable.key);
+      });
+    }
+  } catch (err) {
+    console.error(err);
+    document.body.innerHTML = '<div class="loading">Failed to load data: ' + err.message + '<br><br>Make sure docs/data/*.json files exist (run code/build_dashboard_data.py first).</div>';
+  }
+}
+
+init();
+</script>
+</body>
+</html>

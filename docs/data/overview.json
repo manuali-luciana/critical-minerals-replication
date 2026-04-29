@@ -1,0 +1,230 @@
+{
+  "overview": [
+    {
+      "mineral": "Antimony",
+      "mineral_key": "antimony",
+      "stage": "mining",
+      "available": true,
+      "latest_year": 2023,
+      "top1_country": "China",
+      "top1_share": 34.803572034905436,
+      "hhi": 2615.852910198848
+    },
+    {
+      "mineral": "Antimony",
+      "mineral_key": "antimony",
+      "stage": "refining",
+      "available": false
+    },
+    {
+      "mineral": "Cobalt",
+      "mineral_key": "cobalt",
+      "stage": "mining",
+      "available": true,
+      "latest_year": 2023,
+      "top1_country": "DRC",
+      "top1_share": 68.98094816127603,
+      "hhi": 4914.439121772712
+    },
+    {
+      "mineral": "Cobalt",
+      "mineral_key": "cobalt",
+      "stage": "refining",
+      "available": true,
+      "latest_year": 2023,
+      "top1_country": "China",
+      "top1_share": 79.67855394807235,
+      "hhi": 6412.4860196137715
+    },
+    {
+      "mineral": "Copper",
+      "mineral_key": "copper",
+      "stage": "mining",
+      "available": true,
+      "latest_year": 2023,
+      "top1_country": "Chile",
+      "top1_share": 23.437752627053,
+      "hhi": 1084.881874057067
+    },
+    {
+      "mineral": "Copper",
+      "mineral_key": "copper",
+      "stage": "refining",
+      "available": true,
+      "latest_year": 2023,
+      "top1_country": "China",
+      "top1_share": 50.5372563785496,
+      "hhi": 2709.1492806941756
+    },
+    {
+      "mineral": "Gallium",
+      "mineral_key": "gallium",
+      "stage": "mining",
+      "available": false
+    },
+    {
+      "mineral": "Gallium",
+      "mineral_key": "gallium",
+      "stage": "refining",
+      "available": true,
+      "latest_year": 2023,
+      "top1_country": "China",
+      "top1_share": 96.57853810264385,
+      "hhi": 9333.267222801358
+    },
+    {
+      "mineral": "Germanium",
+      "mineral_key": "germanium",
+      "stage": "mining",
+      "available": false
+    },
+    {
+      "mineral": "Germanium",
+      "mineral_key": "germanium",
+      "stage": "refining",
+      "available": true,
+      "latest_year": 2023,
+      "top1_country": "China",
+      "top1_share": 94.7867298578199,
+      "hhi": 8998.225556478965
+    },
+    {
+      "mineral": "Natural Graphite",
+      "mineral_key": "graphite",
+      "stage": "mining",
+      "available": true,
+      "latest_year": 2023,
+      "top1_country": "China",
+      "top1_share": 69.56337769867099,
+      "hhi": 5002.41349870614
+    },
+    {
+      "mineral": "Natural Graphite",
+      "mineral_key": "graphite",
+      "stage": "refining",
+      "available": false
+    },
+    {
+      "mineral": "Lithium",
+      "mineral_key": "lithium",
+      "stage": "mining",
+      "available": true,
+      "latest_year": 2023,
+      "top1_country": "Australia",
+      "top1_share": 70.16853727518904,
+      "hhi": 5239.092906675276
+    },
+    {
+      "mineral": "Lithium",
+      "mineral_key": "lithium",
+      "stage": "refining",
+      "available": false
+    },
+    {
+      "mineral": "Magnesium",
+      "mineral_key": "magnesium",
+      "stage": "mining",
+      "available": false
+    },
+    {
+      "mineral": "Magnesium",
+      "mineral_key": "magnesium",
+      "stage": "refining",
+      "available": true,
+      "latest_year": 2023,
+      "top1_country": "China",
+      "top1_share": 93.51135727378964,
+      "hhi": 8756.818810515724
+    },
+    {
+      "mineral": "Manganese",
+      "mineral_key": "manganese",
+      "stage": "mining",
+      "available": true,
+      "latest_year": 2023,
+      "top1_country": "South Africa",
+      "top1_share": 36.105494851414605,
+      "hhi": 1998.0608398455793
+    },
+    {
+      "mineral": "Manganese",
+      "mineral_key": "manganese",
+      "stage": "refining",
+      "available": true,
+      "latest_year": 2023,
+      "top1_country": "Russia",
+      "top1_share": 17.998305223963033,
+      "hhi": 1017.6818860170399
+    },
+    {
+      "mineral": "Nickel",
+      "mineral_key": "nickel",
+      "stage": "mining",
+      "available": true,
+      "latest_year": 2023,
+      "top1_country": "Indonesia",
+      "top1_share": 56.29844003706549,
+      "hhi": 3395.9625386424195
+    },
+    {
+      "mineral": "Nickel",
+      "mineral_key": "nickel",
+      "stage": "refining",
+      "available": true,
+      "latest_year": 2023,
+      "top1_country": "Indonesia",
+      "top1_share": 41.371090762011484,
+      "hhi": 2599.9439970729672
+    },
+    {
+      "mineral": "PGMs",
+      "mineral_key": "pgms",
+      "stage": "mining",
+      "available": true,
+      "latest_year": 2023,
+      "top1_country": "South Africa",
+      "top1_share": 56.66059088812357,
+      "hhi": 3902.6125697858947
+    },
+    {
+      "mineral": "PGMs",
+      "mineral_key": "pgms",
+      "stage": "refining",
+      "available": false
+    },
+    {
+      "mineral": "Rare Earths",
+      "mineral_key": "ree",
+      "stage": "mining",
+      "available": true,
+      "latest_year": 2023,
+      "top1_country": "China",
+      "top1_share": 67.5607649468257,
+      "hhi": 4993.672818904255
+    },
+    {
+      "mineral": "Rare Earths",
+      "mineral_key": "ree",
+      "stage": "refining",
+      "available": false
+    },
+    {
+      "mineral": "Tungsten",
+      "mineral_key": "tungsten",
+      "stage": "mining",
+      "available": true,
+      "latest_year": 2023,
+      "top1_country": "China",
+      "top1_share": 80.15739998542593,
+      "hhi": 6494.987253604165
+    },
+    {
+      "mineral": "Tungsten",
+      "mineral_key": "tungsten",
+      "stage": "refining",
+      "available": false
+    }
+  ],
+  "year_min": 2000,
+  "year_max": 2023
+}
